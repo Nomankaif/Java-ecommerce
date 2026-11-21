@@ -38,6 +38,8 @@ jobs:
     steps:
       - name: Download repository code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Set up Java 17
         uses: actions/setup-java@v6
@@ -49,5 +51,14 @@ jobs:
       - name: Allow Maven wrapper to run
         run: chmod +x mvnw
 
-      - name: Build and test
-        run: ./mvnw --batch-mode --no-transfer-progress verify
+      - name: Build, test and analyze
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: >
+          ./mvnw --batch-mode --no-transfer-progress
+          verify
+          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+          -Dsonar.host.url=https://sonarcloud.io
+          -Dsonar.organization=nomankaif
+          -Dsonar.projectKey=Nomankaif_Java-ecommerce
+          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
